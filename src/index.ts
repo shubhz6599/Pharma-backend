@@ -9,32 +9,32 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-import authRoutes    from './routes/auth.routes';
+import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/products.routes';
 import billingRoutes from './routes/billing.routes';
 import mastersRoutes from './routes/masters.routes';
-import { logger }   from './utils/logger';
+import { logger } from './utils/logger';
 
-const app    = express();
-const PORT   = process.env.PORT    || 5000;
-const MONGO  = process.env.MONGODB_URI || 'mongodb://localhost:27017/pharma_db';
+const app = express();
+const PORT = process.env.PORT;
+const MONGO = process.env.MONGODB_URI;
 
 // Security
 app.use(helmet());
 app.use(cors({
-  origin:      process.env.CLIENT_URL || 'http://localhost:4200',
+  origin: process.env.CLIENT_URL,
   credentials: true,
-  methods:     ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Rate limiting
 const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, message: { success: false, message: 'Too many requests.' } });
-const authLimiter   = rateLimit({ windowMs: 15 * 60 * 1000, max: 20,  message: { success: false, message: 'Too many auth attempts.' } });
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: 'Too many auth attempts.' } });
 
 app.use('/api/', globalLimiter);
-app.use('/api/auth/login',          authLimiter);
-app.use('/api/auth/forgot-password',authLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
 
 // Parsing
 app.use(express.json({ limit: '10mb' }));
@@ -46,10 +46,10 @@ if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'));
 app.get('/health', (_req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString() }));
 
 // Routes
-app.use('/api/auth',     authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/billing',  billingRoutes);
-app.use('/api/masters',  mastersRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/masters', mastersRoutes);
 
 // 404
 app.use((_req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
@@ -63,6 +63,9 @@ console.log('RUNNING FROM SRC');
 
 const start = async () => {
   try {
+    if (!MONGO) {
+      throw new Error('MONGODB_URI is not defined in .env');
+    }
     await mongoose.connect(MONGO);
     logger.info('✅ MongoDB connected');
     app.listen(PORT, () => logger.info(`🚀 Server running at http://localhost:${PORT}`));
