@@ -5,6 +5,9 @@ export interface IProductDocument extends Document {
   productName: string;
   hsnNo: string;
   mfgCompany: string;
+  supplierId?: mongoose.Types.ObjectId;
+  supplierName?: string;
+  supplierAddress?: string;
   batch: string;
   pack?: string;
   sch?: string;
@@ -43,6 +46,9 @@ const ProductSchema = new Schema<IProductDocument>(
       trim: true,
       index: true,
     },
+    supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier', index: true },
+    supplierName: { type: String, trim: true },
+    supplierAddress: { type: String, trim: true },
     batch: {
       type: String,
       required: [true, 'Batch number is required'],
