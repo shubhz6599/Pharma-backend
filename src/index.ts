@@ -16,6 +16,7 @@ import mastersRoutes from './routes/masters.routes';
 import { logger } from './utils/logger';
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT;
 const MONGO = process.env.MONGODB_URI;
 
