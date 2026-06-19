@@ -13,6 +13,7 @@ import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/products.routes';
 import billingRoutes from './routes/billing.routes';
 import mastersRoutes from './routes/masters.routes';
+import firmRoutes    from './routes/firm.routes';
 import { logger } from './utils/logger';
 
 const app = express();
@@ -51,6 +52,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/masters', mastersRoutes);
+app.use('/api/config',   firmRoutes);
 
 // 404
 app.use((_req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
