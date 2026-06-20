@@ -1,31 +1,41 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { logger } from './logger';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+     host: 'smtp.gmail.com',
+    port: 587,
+  secure: false,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_APP_PASSWORD,
+    },
+});
 
 export const sendOtpEmail = async (
-  to: string,
-  otp: string,
-  purpose: 'verify' | 'reset'
+    to: string,
+    otp: string,
+    purpose: 'verify' | 'reset'
 ): Promise<void> => {
+    console.log('EMAIL_USER=', process.env.EMAIL_USER);
+    console.log('EMAIL_APP_PASSWORD=', process.env.EMAIL_APP_PASSWORD?.length);
+    const isVerify = purpose === 'verify';
 
-  const isVerify = purpose === 'verify';
+    const subject = isVerify
+        ? 'Verify Your PharmaTrack Account'
+        : 'Reset Your PharmaTrack Password';
 
-  const subject = isVerify
-    ? 'Verify Your PharmaTrack Account'
-    : 'Reset Your PharmaTrack Password';
+    const heading = isVerify
+        ? 'Email Verification'
+        : 'Password Reset';
 
-  const heading = isVerify
-    ? 'Email Verification'
-    : 'Password Reset';
+    const bodyText = isVerify
+        ? 'You recently registered on PharmaTrack Pro. Use the OTP below to verify your email address.'
+        : 'You requested a password reset on PharmaTrack Pro. Use the OTP below to reset your password.';
 
-  const bodyText = isVerify
-    ? 'You recently registered on PharmaTrack Pro. Use the OTP below to verify your email address.'
-    : 'You requested a password reset on PharmaTrack Pro. Use the OTP below to reset your password.';
-
-  const html = `
+    const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
       <h2>${heading}</h2>
+
       <p>${bodyText}</p>
 
       <div style="
@@ -46,23 +56,17 @@ export const sendOtpEmail = async (
     </div>
   `;
 
-  try {
-    const { data, error } = await resend.emails.send({
-      from: 'PharmaTrack <onboarding@resend.dev>',
-      to,
-      subject,
-      html,
-    });
+    try {
+        const info = await transporter.sendMail({
+            from: `"PharmaTrack" <${process.env.EMAIL_USER}>`,
+            to,
+            subject,
+            html,
+        });
 
-    if (error) {
-      logger.error(JSON.stringify(error));
-      throw new Error(error.message);
+        logger.info(`Email sent successfully: ${info.messageId}`);
+    } catch (error) {
+        logger.error('Failed to send email:', error);
+        throw new Error('Failed to send OTP email');
     }
-
-    logger.info(`Email sent successfully. ID: ${data?.id}`);
-
-  } catch (error) {
-    logger.error('Failed to send email:', error);
-    throw new Error('Failed to send OTP email');
-  }
 };
