@@ -100,7 +100,15 @@ export const deleteArea = async (req: Request, res: Response): Promise<void> => 
 export const getTaxes = async (_req: Request, res: Response): Promise<void> => {
   try {
     const data = await TaxMaster.find({ isActive: true }).sort({ totalPercent: 1 }).lean();
-    res.status(200).json({ success: true, data });
+    // Always compute fresh in case stored totalPercent is stale or missing (e.g. older records)
+    const normalized = data.map(t => ({
+      ...t,
+      cgstPercent: t.cgstPercent ?? 0,
+      sgstPercent: t.sgstPercent ?? 0,
+      igstPercent: t.igstPercent ?? 0,
+      totalPercent: (t.cgstPercent ?? 0) + (t.sgstPercent ?? 0),
+    }));
+    res.status(200).json({ success: true, data: normalized });
   } catch (e: any) { res.status(500).json({ success: false, message: e.message }); }
 };
 
@@ -113,8 +121,10 @@ export const createTax = async (req: Request, res: Response): Promise<void> => {
 
 export const updateTax = async (req: Request, res: Response): Promise<void> => {
   try {
-    const doc = await TaxMaster.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const doc = await TaxMaster.findById(req.params.id);
     if (!doc) { res.status(404).json({ success: false, message: 'Tax not found.' }); return; }
+    Object.assign(doc, req.body);
+    await doc.save(); // triggers pre('save') so totalPercent recalculates
     res.status(200).json({ success: true, message: 'Tax updated.', data: doc });
   } catch (e: any) { res.status(400).json({ success: false, message: e.message }); }
 };
