@@ -1,3 +1,4 @@
+// src/models/Supplier.ts
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ISupplierDocument extends Document {
@@ -17,6 +18,8 @@ export interface ISupplierDocument extends Document {
   };
   fullAddress: string; // virtual / computed
   isActive: boolean;
+  totalPurchases: number;
+  outstandingDue: number;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -59,6 +62,8 @@ const SupplierSchema = new Schema<ISupplierDocument>(
       pincode: { type: String, required: [true, 'Pincode is required'], trim: true, match: [/^\d{6}$/, 'Invalid pincode'] },
     },
     isActive:  { type: Boolean, default: true, index: true },
+    totalPurchases: { type: Number, default: 0 },
+    outstandingDue: { type: Number, default: 0, index: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   {

@@ -15,35 +15,85 @@ export interface IUser {
 export interface IProduct {
   _id?: string;
   productName: string;
-  hsnNo: string;
+  genericName?: string;
   mfgCompany: string;
+  category?: string;
+  unit?: string;
+  hsnNo: string;
+  sch?: string;
+  minStockLevel: number;
   supplierId?: string;
   supplierName?: string;
   supplierAddress?: string;
-  batch: string;
-  pack?: string;
-  sch?: string;
-  expDate: Date;
-  mrp: number;
-  rate: number;
-  discPercent?: number;
-  taxableAmount?: number;
-  cgstPercent?: number;
-  cgstAmount?: number;
-  sgstPercent?: number;
-  sgstAmount?: number;
-  quantity: number;
+  isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
+export interface IProductBatch {
+  _id?: string;
+  productId: string;
+  batchNo: string;
+  expDate: Date;
+  quantity: number;
+  mrp: number;
+  ptr: number;
+  saleRate: number;
+  discPercent: number;
+  cgstPercent: number;
+  sgstPercent: number;
+  schemeNote?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface IPurchaseItem {
+  productId: string;
+  productName: string;
+  batchNo: string;
+  expDate: Date;
+  quantity: number;
+  freeQuantity: number;
+  schemeNote?: string;
+  mrp: number;
+  ptr: number;
+  discPercent: number;
+  cgstPercent: number;
+  sgstPercent: number;
+  taxableAmount: number;
+  cgstAmount: number;
+  sgstAmount: number;
+  totalAmount: number;
+}
+
+export interface IPurchase {
+  _id?: string;
+  purchaseNo: string;
+  supplierId: string;
+  supplierName: string;
+  invoiceNo: string;
+  invoiceDate: Date;
+  items: IPurchaseItem[];
+  subtotal: number;
+  totalDiscount: number;
+  totalCgst: number;
+  totalSgst: number;
+  totalTax: number;
+  grandTotal: number;
+  paymentStatus: 'paid' | 'partial' | 'unpaid';
+  amountPaid: number;
+  createdBy: string;
+  createdAt?: Date;
+}
+
 export interface IBillItem {
-  product: string;
+  productId: string;
   productName: string;
   hsnNo: string;
   mfgCode?: string;
-  pack?: string;
+  unit?: string;
   sch?: string;
+  batchId?: string;
   batch: string;
   expDate: Date;
   mrp: number;
@@ -83,16 +133,19 @@ export interface IBill {
   totalSgst: number;
   totalTax: number;
   grandTotal: number;
+  amountPaid: number;
+  paymentStatus: 'paid' | 'partial' | 'credit';
+  isReturned: boolean;
   createdBy: string;
   createdAt?: Date;
 }
 
 export interface ITransaction {
   _id?: string;
-  product: string;
+  productId: string;
   productName: string;
-  batch: string;
-  type: 'purchase' | 'sale' | 'adjustment';
+  batchNo: string;
+  type: 'purchase' | 'sale' | 'purchase_return' | 'sale_return' | 'adjustment';
   quantityBefore: number;
   quantityChange: number;
   quantityAfter: number;

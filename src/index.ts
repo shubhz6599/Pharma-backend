@@ -1,3 +1,4 @@
+// src/index.ts
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -11,6 +12,7 @@ dotenv.config();
 import authRoutes     from './routes/auth.routes';
 import productRoutes  from './routes/products.routes';
 import billingRoutes  from './routes/billing.routes';
+import purchaseRoutes from './routes/purchase.routes';
 import mastersRoutes  from './routes/masters.routes';
 import firmRoutes     from './routes/firm.routes';
 import reportsRoutes  from './routes/reports.routes';
@@ -47,6 +49,7 @@ app.get('/health', (_req, res) => res.json({ status: 'OK', timestamp: new Date()
 app.use('/api/auth',     authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/billing',  billingRoutes);
+app.use('/api/purchase', purchaseRoutes);
 app.use('/api/masters',  mastersRoutes);
 app.use('/api/config',   firmRoutes);
 app.use('/api/reports',  reportsRoutes);

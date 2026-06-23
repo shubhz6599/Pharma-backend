@@ -1,3 +1,4 @@
+// src/models/Customer.ts
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICustomerDocument extends Document {
@@ -17,6 +18,7 @@ export interface ICustomerDocument extends Document {
   fullAddress: string;
   totalBills: number;
   totalSpend: number;
+  outstandingDue: number;   // sum of unpaid/partial bill balances — "Credit Customer" tracking
   isActive: boolean;
   createdBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -53,10 +55,11 @@ const CustomerSchema = new Schema<ICustomerDocument>(
       state:   { type: String, trim: true },
       pincode: { type: String, trim: true },
     },
-    totalBills: { type: Number, default: 0 },
-    totalSpend: { type: Number, default: 0 },
-    isActive:   { type: Boolean, default: true },
-    createdBy:  { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    totalBills:     { type: Number, default: 0 },
+    totalSpend:     { type: Number, default: 0 },
+    outstandingDue: { type: Number, default: 0, index: true },
+    isActive:       { type: Boolean, default: true },
+    createdBy:      { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   {
     timestamps: true,
